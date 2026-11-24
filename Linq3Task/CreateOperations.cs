@@ -63,5 +63,91 @@ namespace Linq3Task
             Console.WriteLine($"ID: {course.Id}");
             Console.WriteLine($"Title: {course.Title}");
         }
+        public static void CreateStudents(AppDbContext context)
+        {
+            var students = new List<Student>
+    {
+        new Student
+        {
+            FullName = "Mostafa Adel",
+            Email = "mostafa@example.com",
+            DateOfBirth = new DateTime(2003, 4, 12)
+        },
+        new Student
+        {
+            FullName = "Nour Ahmed",
+            Email = "nour@example.com",
+            DateOfBirth = new DateTime(2002, 7, 20)
+        },
+        new Student
+        {
+            FullName = "Hassan Mohamed",
+            Email = "hassan@example.com",
+            DateOfBirth = new DateTime(2004, 1, 5)
+        }
+    };
+
+            context.Students.AddRange(students);
+            context.SaveChanges();
+
+            Console.WriteLine("3 Students added successfully!");
+
+            foreach (var student in students)
+            {
+                Console.WriteLine($"{student.Id} - {student.FullName}");
+            }
+        }
+        public static void EnrollStudent(AppDbContext context)
+        {
+            int studentId = 6;
+            int courseId = 1;
+
+            bool studentExists = context.Students
+                .Any(s => s.Id == studentId);
+
+            if (!studentExists)
+            {
+                Console.WriteLine("Student does not exist!");
+                return;
+            }
+
+            var course = context.Courses
+                .FirstOrDefault(c => c.Id == courseId);
+
+            if (course == null)
+            {
+                Console.WriteLine("Course does not exist!");
+                return;
+            }
+
+            if (!course.IsPublished)
+            {
+                Console.WriteLine("Course is not published!");
+                return;
+            }
+
+            bool alreadyEnrolled = context.Enrollments
+                .Any(e => e.StudentId == studentId && e.CourseId == courseId);
+
+            if (alreadyEnrolled)
+            {
+                Console.WriteLine("Student is already enrolled!");
+                return;
+            }
+
+            var enrollment = new Enrollment
+            {
+                StudentId = studentId,
+                CourseId = courseId,
+                EnrolledAt = DateTime.Now,
+                ProgressPercentage = 0,
+                Status = EnrollmentStatus.Active
+            };
+
+            context.Enrollments.Add(enrollment);
+            context.SaveChanges();
+
+            Console.WriteLine("Student enrolled successfully!");
+        }
     }
 }
